@@ -8,17 +8,44 @@ import sys
 import os
 import time
 import ConfigParser
-import socket
+import re
 import requests
+import platform
 
 # copy from https://github.com/nowind/sx_pi/
 # changed by Hakurei Sino
-def connectWireless(ipAddress):
+
+def connectWireless(username, password, ipAddress):
      headers = {'User-Agent': 'China Telecom Client'}
      payload = {'wlanuserip': ipAddress}
      url = 'http://115.239.134.163:8080/showlogin.do'
      r = requests.post(url, data=payload, headers=headers)
-     print(r)
+     if not r.status_code == 200:
+	print("Connect with auth server failed")
+	return
+     uuidl = re.findall("<Uuid>(.*)</Uuid>", r.text)
+     if len(uuidl) == 0:
+	print("Get uuid error")
+	return
+     uuid = uuidl[0]
+     loginURLl = re.findall("<LoginURL>(.*)</LoginURL>", r.text)
+     if len(loginURLl) == 0:
+	print("get loginURL error")
+	return
+     loginURL = loginURLl[0]
+     payload2 = {
+	'username': username,
+	'password': password,
+	'ratingtype': 1,
+	'uuid': uuid
+     }
+     r = requests.post(loginURL, data=payload2, headers=headers)
+     codel = re.findall("<ResponseCode>(.*)</ResponseCode>", r.text)
+     if len(codel) == 0:
+	print("get return code error")
+	return
+     coder = codel[0]
+     print("return code = "+coder)
      
 def execCmd(cmd):  
     r = os.popen(cmd)  
@@ -75,26 +102,36 @@ def calc_pin(username, password, dname, share_key=None, timestamp=None, prefix='
     print("Finish wired connect.")
 
 if __name__ == '__main__':
-     if len(sys.argv) > 1:
-          cf = ConfigParser.ConfigParser()
-          cf.read("singleNet.conf")
-          mUsername = cf.get("config", "username")
-          mPassword = cf.get("config", "password")
-          if sys.argv[1] == "1":
-               if not cf.has_option("config", "built"):
-                    newRas()
-                    cf.set("config", "built", "1")
-                    f = open('singleNet.conf','w')
-                    cf.write(f)
-               print("will do login for account:" + mUsername)
-               calc_pin(mUsername, mPassword, "HSingleNet")
-          elif sys.argv[1] == "2":
-               print(socket.gethostbyname(socket.gethostname()))
-               result = execCmd("java EncryptPassword 123123")
-               print(result)
-               pass
-          else:
-               print("Paramter error 1 for wired connect 2 for wireless connect")
-     else:
-          print("Paramter error 1 for wired connect 2 for wireless connect")
-     pass
+    print("using "+platform.system()+" mode!")
+    if len(sys.argv) > 1:
+	cf = ConfigParser.ConfigParser()
+        cf.read("singleNet.conf")
+        mUsername = cf.get("config", "username")
+        mPassword = cf.get("config", "password")
+        if sys.argv[1] == "1":
+	    if not cf.has_option("config", "built"):
+		newRas()
+                cf.set("config", "built", "1")
+                f = open('singleNet.conf','w')
+                cf.write(f)
+           	print("will do login for account:" + mUsername)
+		calc_pin(mUsername, mPassword, "HSingleNet")
+	elif sys.argv[1] == "2":
+		ipRe = re.compile(r"(?:25[0-5]\.|2[0-4]\d\.|[01]?\d\d?\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)")
+        	wlanList = ['wlp2s0', 'wlan0']
+		wlanip = ""
+		for wlan in wlanList:
+		    ip = execCmd("ifconfig "+wlan)
+		    ipList = ipRe.findall(ip)
+		    if len(ipList) != 0:
+			wlanip = ipList[0]
+			break
+		if wlanip == "":
+		    print("wlan device not found")
+		else:
+		    passRes = execCmd("java EncryptPassword "+mPassword)
+		    connectWireless(mUsername, passRes, wlanip)
+	else:
+		print("Paramter error 1 for wired connect 2 for wireless connect")
+    else:
+          	print("Paramter error 1 for wired connect 2 for wireless connect")

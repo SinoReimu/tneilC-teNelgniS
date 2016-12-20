@@ -1,7 +1,20 @@
-使用方法：（暂只支持闪讯wifi登录）
+
+## Install
+
+```
+git clone https://github.com/MephistoMMM/tneilC-teNelgniS.git
+cd tneilC-teNelgniS
+pip install -r requirement.md
+```
+
+## Usage
+
+*（暂只支持闪讯wifi登录）*
+
 运行install.sh配置权限
-连接闪讯wifi并且运行sx_login并按照提示配置所需信息（第一次） 
-            输入闪讯密码
+
+连接闪讯wifi并且运行sx_login并按照提示配置所需信息（第一次） 输入闪讯密码
+
 完成登录
 
 

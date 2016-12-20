@@ -65,7 +65,10 @@ def cur_file_dir():
      elif os.path.isfile(path):
          return os.path.dirname(path)
 
-def calc_pin(username, password, dname, share_key=None, timestamp=None, prefix='\x0D\x0A'):
+def connectWiredWindows(username, password, pin):
+    cmd = cur_file_dir()+'\\createADSL.exe "'+pin+'" "'+username+'" "'+password+'" "'+dname+'"'
+
+def calc_pin(username, password, share_key=None, timestamp=None, prefix='\x0D\x0A'):
     share_key = 'singlenet01'
     username = username.upper()
 
@@ -95,7 +98,6 @@ def calc_pin(username, password, dname, share_key=None, timestamp=None, prefix='
     before_md5 = struct.pack('>I', time_div_by_five) + username.split('@')[0] + share_key
     pin89_str = hashlib.md5(before_md5).hexdigest()[0:2]
     pin = pin27_str + pin89_str
-    cmd = cur_file_dir()+'\\createADSL.exe "'+pin+'" "'+username+'" "'+password+'" "'+dname+'"'
     #cmd = 'C:\Users\Administrator\Desktop\createADSL.exe "'+pin+'" "'+username+'" "'+password+'"'
     #print(cmd)
     os.system(cmd)
@@ -115,7 +117,7 @@ if __name__ == '__main__':
                 f = open('singleNet.conf','w')
                 cf.write(f)
            	print("will do login for account:" + mUsername)
-		calc_pin(mUsername, mPassword, "HSingleNet")
+	    calc_pin(mUsername, mPassword, "HSingleNet")
 	elif sys.argv[1] == "2":
 		ipRe = re.compile(r"(?:25[0-5]\.|2[0-4]\d\.|[01]?\d\d?\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)")
         	wlanList = ['wlp2s0', 'wlan0']

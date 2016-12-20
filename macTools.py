@@ -1,6 +1,7 @@
+import netifaces
+
 def getIp():
-    pass
-    return ""
-    
+    return netifaces.ifaddresses('en0')[2][0]['addr']
+
 def connectWired(username, password, pin):
     pass

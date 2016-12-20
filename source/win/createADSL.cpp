@@ -4,7 +4,6 @@
 int main(int argc,char*argv[])
 {
 	if (argc == 1) return -1;
-	printf ("%s \n",argv[1]);
 	char szCommandLine[29]="rasdial \"";
 	char mAfter[] = "\" \"\x0D\x0A";
 	char com1[] = "\" \"";
@@ -16,7 +15,6 @@ int main(int argc,char*argv[])
 	strcat(szCommandLine,com1);
 	strcat(szCommandLine,argv[3]);
 	strcat(szCommandLine,final);
-	printf("%s\n", szCommandLine);
 	STARTUPINFO si={sizeof(si)};
 	PROCESS_INFORMATION pi;
 	si.dwFlags=STARTF_USESHOWWINDOW;
